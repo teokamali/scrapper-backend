@@ -3,7 +3,7 @@ const axios = require('axios');
 const logger = require('../config/logger');
 const { Product } = require('../models');
 
-let page = 240;
+let page = 1;
 
 const url = 'https://abzarreza.com/shop';
 

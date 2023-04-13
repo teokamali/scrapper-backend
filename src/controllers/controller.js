@@ -1,6 +1,5 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const search = require('../services/search');
 const { Product } = require('../models');
 const pick = require('../utils/pick');
 
@@ -12,8 +11,11 @@ const getAllData = catchAsync(async (req, res) => {
 });
 
 const searchData = catchAsync(async (req, res) => {
-  const result = await search.searchByName(req.body.value);
-  res.json(result);
+  const filter = { name: { $regex: req.body.value, $options: 'i' } };
+  const options = { sortBy: 'createdAt:desc', limit: 10, page: 1 };
+  const { results, totalPages, totalResults } = await Product.paginate(filter, options);
+
+  res.json({ results, totalPages, totalResults });
 });
 
 module.exports = {

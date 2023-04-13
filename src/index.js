@@ -12,7 +12,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => 
   await abzarReza();
   await abzarMarket();
   server = app.listen(config.port, () => {
-    logger.info(`Listening to port ${config.port}`);
+    logger.info(`Listening to port https://localhost:${config.port}`);
   });
 });
 
