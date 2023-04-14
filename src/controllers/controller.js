@@ -12,10 +12,10 @@ const getAllData = catchAsync(async (req, res) => {
 
 const searchData = catchAsync(async (req, res) => {
   const filter = { name: { $regex: req.body.value, $options: 'i' } };
-  const options = { sortBy: 'createdAt:desc', limit: 10, page: 1 };
-  const { results, totalPages, totalResults } = await Product.paginate(filter, options);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const searchResult = await Product.paginate(filter, options);
 
-  res.json({ results, totalPages, totalResults });
+  res.json(searchResult);
 });
 
 module.exports = {
