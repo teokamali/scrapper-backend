@@ -13,67 +13,13 @@ const headers = {
 };
 let page = 1;
 
-const createAbzarRezaCompany = (productLinks) => {
-  const company = new Company({
-    name: 'Abzar Reza',
-    url: 'https://abzarreza.com',
-    productLinks: productLinks.map((link) => ({ url: link })),
-  });
-
-  return company;
-};
-
-const saveCompany = async (company) => {
-  try {
-    await company.save();
-    logger.info(`Saved Abzar Reza company with ${company.productLinks.length} product links.`);
-  } catch (error) {
-    logger.error(error);
-  }
-};
-const fetchAbzarRezaProductsLinks = async () => {
-  const url = 'https://abzarreza.com/shop';
-  logger.info(`fetching abzarreza website page: ${page}`);
-
-  try {
-    const result = await axios.get(`${url}/page/${page}`, { headers });
-    const $ = cheerio.load(result.data);
-    const products = $('#us_grid_18 > div.w-grid-list > article.product');
-    const productLinks = products
-      .map((i, product) => {
-        return $(product).find('div > a').attr('href');
-      })
-      .get();
-    logger.info('Done fetching AbzarReza product links!');
-
-    const company = createAbzarRezaCompany(productLinks);
-    await saveCompany(company);
-
-    const nextButton = $('#us_grid_18 > nav > div > a.next');
-    if (nextButton.length) {
-      page += 1;
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(fetchAbzarRezaProductsLinks());
-        }, 1000);
-      });
-    }
-
-    return;
-  } catch (error) {
-    logger.error(error);
-  }
-};
-
 const fetchAndSaveProduct = async (link) => {
   try {
     const company = await Company.findOne({ name: 'Abzar Reza' });
-
     const result = await axios.get(`${link}`, { headers });
     const $ = cheerio.load(result.data);
     const productName = $('#page_title').text();
     const productImage = $('#product_base_data .product_gallery.us_custom_2d9ebfef > div > figure > div > a').attr('href');
-
     const productDescription = $('#content-description > div > div > p').text();
     const productPrice = $('.product_field.price.us_custom_327d9f11 > span > bdi').text();
     const attributes = $('.product_field.attributes > div');
@@ -89,7 +35,7 @@ const fetchAndSaveProduct = async (link) => {
       name: productName,
       image: productImage,
       price: productPrice || 'ناموجود',
-      description: productDescription || '',
+      description: productDescription || 'محتوا پیدا نشد',
       attributes: productAttributes,
       companyId: company._id,
     });
@@ -101,30 +47,66 @@ const fetchAndSaveProduct = async (link) => {
   }
 };
 
-const fetchAbzarRezaSingleProductData = async () => {
-  const company = await Company.findOne({ name: 'Abzar Reza' });
-  const linkList = company.productLinks;
-  logger.info(linkList);
-
-  linkList.map(async (link) => {
+const fetchAbzarRezaSingleProductData = async (productLinks) => {
+  const promises = productLinks.map(async (link, index) => {
     const { url } = link;
-    await fetchAndSaveProduct(url);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000 + index)); // wait for 1 second + index
+      return fetchAndSaveProduct(url);
+    } catch (error) {
+      logger.error(error);
+    }
   });
+
+  await Promise.all(promises); // wait for all promises to resolve
+
+  // function will only return after all promises have resolved
+};
+
+const fetchAbzarRezaProductsLinks = async () => {
+  const url = 'https://abzarreza.com/shop';
+  logger.info(`fetching abzarreza website page: ${page}`);
+  try {
+    const result = await axios.get(`${url}/page/${page}`, { headers });
+    const $ = cheerio.load(result.data);
+    const products = $('#us_grid_18 > div.w-grid-list > article.product');
+    const productLinks = products
+      .map((i, product) => {
+        const link = $(product).find('div > a').attr('href');
+        return { url: link };
+      })
+      .get();
+    logger.info('Done fetching AbzarReza product links!');
+
+    await fetchAbzarRezaSingleProductData(productLinks);
+
+    const nextButton = $('#us_grid_18 > nav > div > a.next');
+    if (nextButton.length) {
+      page += 1;
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(fetchAbzarRezaProductsLinks());
+        }, 1000);
+      });
+    }
+  } catch (error) {
+    logger.error(error);
+  }
 };
 
 const abzarReza = async () => {
-  // Delete all products related to Abzar Reza
-  await Product.deleteMany({ company: { name: 'Abzar Reza' } });
-  logger.info('All Abzar Reza products deleted from the database.');
-
   // Delete the Abzar Reza company document
   await Company.findOneAndDelete({ name: 'Abzar Reza' });
   logger.info('Abzar Reza company document deleted from the database.');
-
+  const company = new Company({
+    name: 'Abzar Reza',
+    url: 'https://abzarreza.com',
+  });
+  await company.save();
   // Fetch new product links and product data for Abzar Reza
   await fetchAbzarRezaProductsLinks();
-  await fetchAbzarRezaSingleProductData();
-  logger.info('New Abzar Reza data saved to the database.');
+
+  return logger.info('New Abzar Reza data saved to the database.');
 };
 
 module.exports = abzarReza;

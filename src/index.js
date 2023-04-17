@@ -1,19 +1,21 @@
 const mongoose = require('mongoose');
-// const app = require('./app');
+const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-const { abzarReza } = require('./services');
+const { abzarReza, abzarMarket } = require('./services');
 const { Product } = require('./models');
 
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
   logger.info('Connected to MongoDB');
   await Product.deleteMany();
+  logger.info('All products deleted from the database.');
+
   await abzarReza();
-  // await abzarMarket();
-  // server = app.listen(config.port, () => {
-  //   logger.info(`Listening to port https://localhost:${config.port}`);
-  // });
+  await abzarMarket();
+  server = app.listen(config.port, () => {
+    logger.info(`Listening to port https://localhost:${config.port}`);
+  });
 });
 
 const exitHandler = () => {
