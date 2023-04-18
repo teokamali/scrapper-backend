@@ -1,7 +1,8 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { Product } = require('../models');
+const { Product, Company } = require('../models');
 const pick = require('../utils/pick');
+const { createCSVFile } = require('../services');
 
 const getAllData = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'role']);
@@ -17,8 +18,20 @@ const searchData = catchAsync(async (req, res) => {
 
   res.json(searchResult);
 });
+const createCsv = catchAsync(async (req, res) => {
+  await createCSVFile(req.body.companyName);
+  res.json({
+    status: 'files are created',
+  });
+});
+const getCompanies = catchAsync(async (req, res) => {
+  const companies = await Company.find();
+  res.json(companies);
+});
 
 module.exports = {
   getAllData,
   searchData,
+  createCsv,
+  getCompanies,
 };

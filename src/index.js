@@ -8,11 +8,13 @@ const { Product } = require('./models');
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
   logger.info('Connected to MongoDB');
-  await Product.deleteMany();
-  logger.info('All products deleted from the database.');
+  if (process.argv.includes(':fetch-data')) {
+    await Product.deleteMany();
+    logger.info('All products deleted from the database.');
+    await abzarReza();
+    await abzarMarket();
+  }
 
-  await abzarReza();
-  await abzarMarket();
   server = app.listen(config.port, () => {
     logger.info(`Listening to port https://localhost:${config.port}`);
   });
