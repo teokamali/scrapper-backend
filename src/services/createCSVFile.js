@@ -7,7 +7,6 @@ const fetchDataFromDataBase = async (companyName) => {
   logger.info(companyName);
   const company = await Company.findOne({ name: companyName });
   const products = await Product.find({ companyId: company._id });
-  logger.info(products.length);
 
   const allProduct = products.map((product, index) => {
     const { name, image, price, description } = product;
