@@ -2,12 +2,21 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
+const { abzarReza, abzarMarket } = require('./services');
+const { Product } = require('./models');
 
 let server;
-mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
+mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
   logger.info('Connected to MongoDB');
+  if (process.argv.includes(':fetch-data')) {
+    await Product.deleteMany();
+    logger.info('All products deleted from the database.');
+    await abzarReza();
+    await abzarMarket();
+  }
+
   server = app.listen(config.port, () => {
-    logger.info(`Listening to port ${config.port}`);
+    logger.info(`Listening to port https://localhost:${config.port}`);
   });
 });
 
