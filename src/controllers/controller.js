@@ -15,7 +15,7 @@ const getAllData = catchAsync(async (req, res) => {
 const searchData = catchAsync(async (req, res) => {
   const filter = { name: { $regex: req.body.value, $options: 'i' } };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const searchResult = await Product.paginate(filter, options);
+  const searchResult = await Product.paginate(filter, { ...options, populate: 'company' });
 
   res.json(searchResult);
 });

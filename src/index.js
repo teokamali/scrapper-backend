@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const fs = require('fs');
+const path = require('path');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
@@ -8,8 +10,19 @@ const { Product } = require('./models');
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
   logger.info('Connected to MongoDB');
-  if (process.argv.includes(':fetch-data')) {
+  if (process.argv.includes('-fetch')) {
     await Product.deleteMany();
+    const imageFolder = path.join(`${__dirname}`, '../public/images');
+    logger.info(imageFolder);
+    // Delete the folder if it exists
+    if (fs.existsSync(imageFolder)) {
+      fs.rmdirSync(imageFolder, { recursive: true });
+      logger.info(`Deleted folder: ${imageFolder}`);
+    }
+    // Recreate the folder
+    fs.mkdirSync(imageFolder);
+    logger.info(`Created folder: ${imageFolder}`);
+
     logger.info('All products deleted from the database.');
     await abzarReza();
     await abzarMarket();
