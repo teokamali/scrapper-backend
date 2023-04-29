@@ -35,9 +35,13 @@ app.use(mongoSanitize());
 // gzip compression
 app.use(compression());
 
-// enable cors
-app.use(cors());
-app.options('*', cors());
+// Allow only https://front.amirmsn.ir/ as an allowed origin
+const corsOptions = {
+  origin: 'https://front.amirmsn.ir',
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use('/v1', routes);
 
