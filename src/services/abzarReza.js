@@ -28,7 +28,7 @@ const fetchAndSaveProduct = async (link) => {
 
     const product = new Product({
       name: productName,
-      image: `https://abzarcheck.com/2023/${productName}.jpeg`,
+      image: `${process.env.Domain}/images/${productName}.jpeg`,
       price: productPrice || 'ناموجود',
       description: productDescription || 'محتوا پیدا نشد',
       company: company._id,

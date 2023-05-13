@@ -37,7 +37,8 @@ app.use(compression());
 
 // Allow only https://front.amirmsn.ir/ as an allowed origin
 const corsOptions = {
-  origin: 'https://front.amirmsn.ir',
+  // origin: 'https://front.amirmsn.ir',
+  origin: 'http://localhost:3000',
 };
 
 app.use(cors(corsOptions));

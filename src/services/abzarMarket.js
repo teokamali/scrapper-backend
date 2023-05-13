@@ -22,7 +22,7 @@ const fetchAndSaveProduct = async (link) => {
     const productImage = $('div.gallery-main.position-relative > img').attr('ref');
     await SaveImage(productImage, productName);
     const productDescription = $('#tab-description > div.product-description:nth-child(1)').text();
-    product.image = `https://abzarcheck.com/2023/${productName}.jpeg`;
+    product.image = `${process.env.Domain}/images/${productName}.jpeg`;
     product.description = productDescription;
     await product.save();
     logger.info(`product ${productName} updated`);
