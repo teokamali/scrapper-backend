@@ -5,6 +5,7 @@ const { Product, Company } = require('../models');
 const pick = require('../utils/pick');
 
 const { createCSVFile } = require('../services');
+const paginate = require('./plugins/paginate.plugin');
 
 const getAllData = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'role']);
@@ -31,7 +32,12 @@ const searchData = catchAsync(async (req, res) => {
       return product;
     })
   );
-  res.json({ searchResult });
+  const data = searchResult;
+  const { page, limit } = req.query;
+
+  const paginateData = paginate(data);
+  const paginatedResult = paginateData(page, limit);
+  res.json(paginatedResult);
 });
 
 const createCsv = catchAsync(async (req, res) => {
