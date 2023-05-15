@@ -28,14 +28,14 @@ const searchData = catchAsync(async (req, res) => {
 
   const searchResult = await Promise.all(
     results.map(async (item) => {
-      const product = await Product.findOne({ name: item.name });
+      const product = await Product.findOne({ name: item.name }).populate('company');
       return product;
     })
   );
-  const data = searchResult;
+  // product.company
   const { page, limit } = req.query;
 
-  const paginateData = paginate(data);
+  const paginateData = paginate(searchResult);
   const paginatedResult = paginateData(page, limit);
   res.json(paginatedResult);
 });
