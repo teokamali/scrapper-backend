@@ -7,7 +7,7 @@ const seed = require('./seed');
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
   logger.info('Connected to MongoDB');
-  if (process.env.DEV_SEED === 'true') {
+  if (process.env.SEED === 'true') {
     await seed();
   }
 

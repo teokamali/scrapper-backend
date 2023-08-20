@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-non-literal-fs-filename */
 const path = require('path');
 const fs = require('fs');
 const { abzarMarket, abzarReza } = require('./services');
@@ -18,7 +19,7 @@ const seed = async () => {
   logger.info(`Created folder: ${imageFolder}`);
 
   logger.info('All products deleted from the database.');
-  await abzarReza();
   await abzarMarket();
+  await abzarReza();
 };
 module.exports = seed;
