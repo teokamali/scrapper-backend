@@ -1,6 +1,6 @@
 # Dependencies
 node_modules
-public/*
+public
 
 # yarn error logs
 yarn-error.log
