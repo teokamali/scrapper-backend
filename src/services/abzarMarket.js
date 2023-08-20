@@ -2,6 +2,7 @@ const cheerio = require('cheerio');
 const axios = require('axios');
 const logger = require('../config/logger');
 const { Product, Company } = require('../models');
+const SaveImage = require('../utils/SaveImage');
 
 const headers = {
   'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:12.0) Gecko/20100101 Firefox/12.0',
@@ -18,21 +19,11 @@ const fetchAndSaveProduct = async (link) => {
     const $ = cheerio.load(result.data);
     const productName = $('div.product-title h1').text();
     const product = await Product.findOne({ name: productName });
-
     const productImage = $('div.gallery-main.position-relative > img').attr('ref');
+    await SaveImage(productImage, productName);
     const productDescription = $('#tab-description > div.product-description:nth-child(1)').text();
-    const attributes = $('#tab-specifications > div > table > tbody');
-
-    const productAttributes = attributes
-      .map(() => {
-        const attrTitle = $('#tab-specifications span.specs-label').text();
-        const attrValue = $('#tab-specifications span.specs-value').text();
-        return { title: attrTitle, value: attrValue };
-      })
-      .get();
-    product.image = productImage;
+    product.image = `${process.env.Domain}/images/${productName}.jpeg`;
     product.description = productDescription;
-    product.attributes = productAttributes;
     await product.save();
     logger.info(`product ${productName} updated`);
   } catch (error) {
@@ -74,7 +65,7 @@ const fetchAbzarMarketProductsLinks = async () => {
           const newProduct = new Product({
             name: productName,
             price: productPrice || 'ناموجود',
-            companyId: company._id,
+            company: company._id,
           });
           newProduct.save();
         } catch (error) {

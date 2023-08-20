@@ -22,21 +22,7 @@ const productSchema = new mongoose.Schema({
     required: false,
     trim: true,
   },
-  attributes: [
-    {
-      title: {
-        type: String,
-        required: false,
-        trim: true,
-      },
-      value: {
-        type: String,
-        required: false,
-        trim: true,
-      },
-    },
-  ],
-  companyId: {
+  company: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Company',
     required: true,

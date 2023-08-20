@@ -2,17 +2,13 @@ const mongoose = require('mongoose');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-const { abzarReza, abzarMarket } = require('./services');
-const { Product } = require('./models');
+const seed = require('./seed');
 
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(async () => {
   logger.info('Connected to MongoDB');
-  if (process.argv.includes(':fetch-data')) {
-    await Product.deleteMany();
-    logger.info('All products deleted from the database.');
-    await abzarReza();
-    await abzarMarket();
+  if (process.env.SEED === 'true') {
+    await seed();
   }
 
   server = app.listen(config.port, () => {
